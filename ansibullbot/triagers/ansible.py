@@ -98,10 +98,7 @@ from ansibullbot.parsers.botmetadata import BotMetadataParser
 
 
 REPOS = [
-    u'ansible/ansible',
     u'ansible-collections/general',
-    u'ansible/ansible-modules-core',
-    u'ansible/ansible-modules-extras'
 ]
 
 MREPOS = [x for x in REPOS if u'ansible' in x]
@@ -499,15 +496,8 @@ class AnsibleTriage(DefaultTriager):
                         self.build_history(iw)
 
                     actions = AnsibleActions()
-                    if iw.repo_full_name not in MREPOS:
-                        # basic processing for ansible-collections/general
-                        self.process(iw)
-                    else:
-                        # module repo processing ...
-                        self.run_module_repo_issue(iw, actions)
-                        # do nothing else on these repos
-                        redo = False
-                        continue
+                    # basic processing for Collection repos
+                    self.process(iw)
 
                     # build up actions from the meta
                     self.create_actions(iw, actions)
