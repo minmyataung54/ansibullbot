@@ -179,32 +179,23 @@ class AnsibleComponentMatcher(object):
         # make a list of names by calling ansible-doc
         checkoutdir = self.gitrepo.checkoutdir
         checkoutdir = os.path.abspath(checkoutdir)
-        cmd = u'. {}/hacking/env-setup; ansible-doc -t module -F'.format(checkoutdir)
-        logging.debug(cmd)
-        (rc, so, se) = run_command(cmd, cwd=checkoutdir)
-        if rc:
-            raise Exception("'ansible-doc' command failed (%s, %s %s)" % (rc, so, se))
-        lines = to_text(so).split(u'\n')
-        for line in lines:
+        for root, directories, filenames in os.walk(os.path.join(checkoutdir, 'plugins', 'modules')):
+            for filename in filenames:
+                naive_fpath = os.path.join(root, filename)
+                fpath = naive_fpath.replace(checkoutdir + u'/', u'')
+                assert fpath != naive_fpath
 
-            # compat for macos tmpdirs
-            if u' /private' in line:
-                line = line.replace(u' /private', u'', 1)
+                # Record the module name
+                mname = os.path.basename(fpath)
+                if not mname.endswith('.py'):
+                    # Not a module as all modules we use are either python or have docs saved in
+                    # a python file
+                    continue
+                mname = mname[:-3]
+                if mname not in self.MODULE_NAMES:
+                    self.MODULE_NAMES.append(mname)
 
-            parts = line.split()
-            parts = [x.strip() for x in parts]
-
-            if len(parts) != 2 or checkoutdir not in line:
-                continue
-
-            mname = parts[0]
-            if mname not in self.MODULE_NAMES:
-                self.MODULE_NAMES.append(mname)
-
-            fpath = parts[1]
-            fpath = fpath.replace(checkoutdir + u'/', u'')
-
-            if fpath not in self.MODULES:
+                # Modules indexed by filepath
                 self.MODULES[fpath] = {
                     u'name': mname,
                     u'repo_filename': fpath,
