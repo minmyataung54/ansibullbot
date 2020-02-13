@@ -593,6 +593,7 @@ class DefaultWrapper(object):
                 version = versions[-1]
                 template_data[u'ansible version'] = to_text(version)
 
+        # Don't think "C:" (component) labels are needed for collections
         if u'COMPONENT NAME' in tf_sections and u'component name' not in template_data:
             if self.is_pullrequest():
                 fns = self.files
@@ -1137,7 +1138,7 @@ class DefaultWrapper(object):
     def new_modules(self):
         new_modules = self.new_files
         new_modules = [
-            x for x in new_modules if x.startswith(u'lib/ansible/modules')
+            x for x in new_modules if x.startswith(u'plugins/modules')
         ]
         new_modules = [
             x for x in new_modules if not os.path.basename(x) == u'__init__.py'

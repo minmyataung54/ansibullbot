@@ -109,10 +109,11 @@ def get_automerge_facts(issuewrapper, meta):
         for pr_file in issue.pr_files:
 
             thisfn = pr_file.filename
-            if thisfn.startswith(u'lib/ansible/modules'):
+            # FIXME review this. May not want to give (super)shipit to .github or other special files
+            if thisfn.startswith(u'plugins/'):
                 continue
 
-            elif fnmatch(thisfn, u'test/sanity/*/*.txt'):
+            elif fnmatch(thisfn, u'tests/'):
                 if pr_file.additions or pr_file.status == u'added':
                     # new exception added, addition must be checked by an human
                     return create_ameta(False, u'automerge new file(s) test failed')
@@ -281,7 +282,7 @@ def get_shipit_facts(issuewrapper, inmeta, module_indexer, core_team=[], botname
     module_utils_files_owned = 0  # module_utils files for which submitter is maintainer
     if meta[u'is_module_util']:
         for f in files:
-            if f.startswith(u'lib/ansible/module_utils') and f in module_indexer.botmeta[u'files']:
+            if f.startswith(u'plugins/module_utils') and f in module_indexer.botmeta[u'files']:
                 maintainers = module_indexer.botmeta[u'files'][f].get(u'maintainers', [])
                 if maintainers and (iw.submitter in maintainers):
                     module_utils_files_owned += 1
@@ -289,7 +290,7 @@ def get_shipit_facts(issuewrapper, inmeta, module_indexer, core_team=[], botname
     modules_files_owned = 0
     if not meta[u'is_new_module']:
         for f in files:
-            if f.startswith(u'lib/ansible/modules') and iw.submitter in meta[u'component_maintainers']:
+            if f.startswith(u'plugins/modules') and iw.submitter in meta[u'component_maintainers']:
                 modules_files_owned += 1
     nmeta[u'owner_pr'] = modules_files_owned + module_utils_files_owned == len(files)
 

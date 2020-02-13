@@ -42,7 +42,7 @@ class GitRepoWrapper(object):
 
     @property
     def module_files(self):
-        return [x for x in self._files if x.startswith(u'lib/ansible/modules')]
+        return [x for x in self._files if x.startswith(u'plugins/modules')]
 
     def create_checkout(self):
         """checkout ansible"""
