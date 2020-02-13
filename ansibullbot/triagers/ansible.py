@@ -99,7 +99,7 @@ from ansibullbot.parsers.botmetadata import BotMetadataParser
 
 REPOS = [
     u'ansible/ansible',
-    u'ansible-collections/general'
+    u'ansible-collections/general',
     u'ansible/ansible-modules-core',
     u'ansible/ansible-modules-extras'
 ]
