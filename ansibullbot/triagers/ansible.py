@@ -99,11 +99,12 @@ from ansibullbot.parsers.botmetadata import BotMetadataParser
 
 REPOS = [
     u'ansible/ansible',
+    u'ansible-collections/general'
     u'ansible/ansible-modules-core',
     u'ansible/ansible-modules-extras'
 ]
 
-MREPOS = [x for x in REPOS if u'modules' in x]
+MREPOS = [x for x in REPOS if u'ansible' in x]
 REPOMERGEDATE = datetime.datetime(2016, 12, 6, 0, 0, 0)
 MREPO_CLOSE_WINDOW = 60
 
@@ -216,7 +217,7 @@ class AnsibleTriage(DefaultTriager):
 
         # get valid labels
         logging.info(u'getting labels')
-        self.valid_labels = self.get_valid_labels(u"ansible/ansible")
+        self.valid_labels = self.get_valid_labels(u"ansible-collections/general")
 
         self._ansible_members = []
         self._ansible_core_team = None
@@ -247,9 +248,9 @@ class AnsibleTriage(DefaultTriager):
         else:
             self.gqlc = None
 
-        # clone ansible/ansible
+        # clone ansible-collections/general
         logging.info(u'creating gitrepowrapper')
-        repo = u'https://github.com/ansible/ansible'
+        repo = u'https://github.com/ansible-collections/general'
         gitrepo = GitRepoWrapper(cachedir=self.cachedir_base, repo=repo, commit=self.ansible_commit)
 
         # set the indexers
@@ -445,7 +446,7 @@ class AnsibleTriage(DefaultTriager):
 
                             if skip and not mod_repo:
 
-                                # re-check ansible/ansible after
+                                # re-check ansible-collections/general after
                                 # a window of time since the last check.
                                 lt = lmeta[u'time']
                                 lt = strip_time_safely(lt)
@@ -499,7 +500,7 @@ class AnsibleTriage(DefaultTriager):
 
                     actions = AnsibleActions()
                     if iw.repo_full_name not in MREPOS:
-                        # basic processing for ansible/ansible
+                        # basic processing for ansible-collections/general
                         self.process(iw)
                     else:
                         # module repo processing ...
@@ -2427,6 +2428,8 @@ class AnsibleTriage(DefaultTriager):
     def create_parser(cls):
 
         parser = DefaultTriager.create_parser()
+        import q
+        q.q(MREPOS)
 
         parser.description = "Triage issue and pullrequest queues for Ansible.\n" \
                              " (NOTE: only useful if you have commit access to" \
