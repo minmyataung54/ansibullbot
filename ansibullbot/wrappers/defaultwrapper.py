@@ -535,22 +535,15 @@ class DefaultWrapper(object):
         """Extract templated data from an issue body"""
 
         if self.is_issue():
-            tfile = u'.github/ISSUE_TEMPLATE/bug_report.md'
+            tfile = u'ISSUE_TEMPLATE/bug_report.md'
         else:
-            tfile = u'.github/PULL_REQUEST_TEMPLATE.md'
+            tfile = u'PULL_REQUEST_TEMPLATE.md'
 
-        # use the fileindexer whenever possible to conserve ratelimits
-        if self.file_indexer:
-            tf_content = self.file_indexer.get_file_content(tfile)
-        else:
-            try:
-                tf = self.repo.get_file_contents(tfile)
-                tf_content = tf.decoded_content
-            except Exception:
-                logging.warning(u'repo does not have {}'.format(tfile))
-                tf_content = u''
+        # FIXME See if templates exist in collection, if not fall back to gh/ansible-collections/.github repo
+        tf_content = to_text(open(os.jointfile,"rb").read())
 
-        # pull out the section names from the tempalte
+
+        # pull out the section names from the template
         tf_sections = extract_template_sections(tf_content, header=self.TEMPLATE_HEADER)
 
         # what is required?
