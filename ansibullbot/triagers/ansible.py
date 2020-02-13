@@ -1402,24 +1402,6 @@ class AnsibleTriage(DefaultTriager):
                         actions.unlabel.append(u'needs_maintainer')
 
         # https://github.com/ansible/ansibullbot/issues/608
-        if not self.meta[u'is_bad_pr']:
-            if not self.meta.get(u'component_support'):
-                cs_labels = [u'support:core']
-            else:
-                cs_labels = []
-                for sb in self.meta.get(u'component_support'):
-                    if sb is None:
-                        sb = u'core'
-                    cs_label = u'support:%s' % sb
-                    cs_labels.append(cs_label)
-            for cs_label in cs_labels:
-                if cs_label not in iw.labels:
-                    actions.newlabel.append(cs_label)
-            other_cs_labels = [x for x in iw.labels if x.startswith(u'support:')]
-            for ocs_label in other_cs_labels:
-                if ocs_label not in cs_labels:
-                    actions.unlabel.append(ocs_label)
-
         if not self.meta[u'stale_reviews']:
             if u'stale_review' in iw.labels:
                 actions.unlabel.append(u'stale_review')
