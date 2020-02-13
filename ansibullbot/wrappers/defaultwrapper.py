@@ -540,7 +540,7 @@ class DefaultWrapper(object):
             tfile = u'PULL_REQUEST_TEMPLATE.md'
 
         # FIXME See if templates exist in collection, if not fall back to gh/ansible-collections/.github repo
-        tf_content = to_text(open(os.jointfile,"rb").read())
+        tf_content = to_text(open(tfile,"rb").read())
 
 
         # pull out the section names from the template
