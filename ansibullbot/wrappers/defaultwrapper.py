@@ -535,7 +535,7 @@ class DefaultWrapper(object):
         """Extract templated data from an issue body"""
 
         if self.is_issue():
-            tfile = u'ISSUE_TEMPLATE/bug_report.md'
+            tfile = u'bug_report.md'
         else:
             tfile = u'PULL_REQUEST_TEMPLATE.md'
 
