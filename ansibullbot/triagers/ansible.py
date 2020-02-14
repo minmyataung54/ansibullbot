@@ -32,6 +32,7 @@ import io
 import json
 import logging
 import os
+import warnings
 
 import pytz
 import requests
@@ -177,6 +178,23 @@ class AnsibleTriage(DefaultTriager):
         u'close_me'
     ]
 
+    @property
+    def gws(self):
+        if not self._gws:
+            # create the scraper for www data
+            logging.info(u'creating webscraper')
+            warnings.warn('''
+                        ****
+                        The github webscraper backend is deprecated and probably does not work.
+                        Something went wrong with the graphql backend
+                        ****
+                        ''')
+            self._gws = GithubWebScraper(
+                cachedir=self.cachedir_base,
+                server=C.DEFAULT_GITHUB_URL
+            )
+        return self._gws
+
     def __init__(self, args=None):
 
         super(AnsibleTriage, self).__init__()
@@ -230,12 +248,11 @@ class AnsibleTriage(DefaultTriager):
         # scraped summaries for all issues
         self.issue_summaries = {}
 
-        # create the scraper for www data
-        logging.info(u'creating webscraper')
-        self.gws = GithubWebScraper(
-            cachedir=self.cachedir_base,
-            server=C.DEFAULT_GITHUB_URL
-        )
+        # This is for the github webscraper.  Will only be used if the graphql backend is
+        # nonfunctional
+        self._gws = None
+
+        # graphql backend
         if C.DEFAULT_GITHUB_TOKEN:
             logging.info(u'creating graphql client')
             self.gqlc = GithubGraphQLClient(
