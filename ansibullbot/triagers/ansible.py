@@ -102,6 +102,13 @@ REPOS = [
     u'ansible-collections/general',
 ]
 
+# Collection Repos, where Bot is allowed to run
+CREPOS = [
+    u'ansible-collections/general',
+    u'ansible-collections/aws',
+    u'ansible-collections/windows',
+]
+
 MREPOS = [x for x in REPOS if u'ansible' in x]
 REPOMERGEDATE = datetime.datetime(2016, 12, 6, 0, 0, 0)
 MREPO_CLOSE_WINDOW = 60
@@ -231,8 +238,8 @@ class AnsibleTriage(DefaultTriager):
         self.ghw = GithubWrapper(self.gh, cachedir=self.cachedir_base)
 
         # get valid labels
-        logging.info(u'getting labels')
-        self.valid_labels = self.get_valid_labels(u"ansible-collections/general")
+        logging.info(u'getting labels from ' + str(self.collection))
+        self.valid_labels = self.get_valid_labels(self.collection)
 
         self._ansible_members = []
         self._ansible_core_team = None
@@ -262,9 +269,9 @@ class AnsibleTriage(DefaultTriager):
         else:
             self.gqlc = None
 
-        # clone ansible-collections/general
+        # clone repo
         logging.info(u'creating gitrepowrapper')
-        repo = u'https://github.com/ansible-collections/general'
+        repo = u'https://github.com/' + str(self.collection)
         gitrepo = GitRepoWrapper(cachedir=self.cachedir_base, repo=repo, commit=self.ansible_commit)
 
         # set the indexers
@@ -460,7 +467,7 @@ class AnsibleTriage(DefaultTriager):
 
                             if skip and not mod_repo:
 
-                                # re-check ansible-collections/general after
+                                # re-check repo after
                                 # a window of time since the last check.
                                 lt = lmeta[u'time']
                                 lt = strip_time_safely(lt)
@@ -2409,15 +2416,16 @@ class AnsibleTriage(DefaultTriager):
     def create_parser(cls):
 
         parser = DefaultTriager.create_parser()
-        import q
-        q.q(MREPOS)
-
         parser.description = "Triage issue and pullrequest queues for Ansible.\n" \
                              " (NOTE: only useful if you have commit access to" \
                              " the repo in question.)"
 
+        parser.add_argument("--collection", "-c", type=str, choices=CREPOS,
+                            required=True,
+                            help="GitHub Collection repo to triage")
+
         parser.add_argument("--repo", "-r", type=str, choices=MREPOS,
-                            help="Github repo to triage (defaults to all)")
+                            help="GitHub repo to triage (defaults to all)")
 
         parser.add_argument("--skip_no_update", action="store_true",
                             help="skip processing if updated_at hasn't changed")

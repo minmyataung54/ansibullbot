@@ -1343,7 +1343,7 @@ class DefaultWrapper(object):
         if not self.incoming_repo_exists:
             return True
 
-        return self.incoming_repo_slug != u'ansible-collections/general'
+        return self.incoming_repo_slug != str(self.collection)
 
     @RateLimited
     def get_commit_parents(self, commit):
