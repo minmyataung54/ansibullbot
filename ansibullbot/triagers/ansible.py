@@ -1057,9 +1057,13 @@ class AnsibleTriage(DefaultTriager):
                     actions.unlabel.append(u'needs_ci')
 
         # MODULE CATEGORY LABELS
+        # {u'cloud/amazon': u'aws', u'cloud/azure': u'azure', u'network': u'networking', u'cloud/google': u'gce', u'windows': u'windows', u'cloud/openstack': u'openstack', u'cloud/digital_ocean': u'digital_ocean', u'cloud': u'cloud'}
+        # FIXME This will want testing once we have subdirectories under plugins/modules/
         if not self.meta[u'is_bad_pr']:
-            if self.meta[u'is_new_module'] or self.meta[u'is_module']:
+            # I think we want labels on everything
+            if True: # self.meta[u'is_new_module'] or self.meta[u'is_module']:
                 # add topic labels
+                logging.warning(self.MODULE_NAMESPACE_LABELS)
                 for t in [u'topic', u'subtopic']:
 
                     mmatches = self.meta[u'module_match']
@@ -1084,7 +1088,7 @@ class AnsibleTriage(DefaultTriager):
                                     not iw.history.was_unlabeled(label):
                                 actions.newlabel.append(label)
 
-        # NEW MODULE
+        # MODULE LABELS
         if not self.meta[u'is_bad_pr']:
             if self.meta[u'is_new_module']:
                 if u'new_module' not in iw.labels:
@@ -1096,29 +1100,18 @@ class AnsibleTriage(DefaultTriager):
             if self.meta[u'is_module']:
                 if u'module' not in iw.labels:
                     # don't add manually removed label
-                    if not iw.history.was_unlabeled(
-                        u'module',
-                        bots=self.BOTNAMES
-                    ):
-                        actions.newlabel.append(u'module')
+                    # Why not?
+                    actions.newlabel.append(u'module')
             else:
                 if u'module' in iw.labels:
-                    # don't remove manually added label
-                    if not iw.history.was_labeled(
-                        u'module',
-                        bots=self.BOTNAMES
-                    ):
-                        actions.unlabel.append(u'module')
+                    actions.unlabel.append(u'module')
 
-        # NEW PLUGIN
+        # PLUGIN LABELS
         if not self.meta[u'is_bad_pr']:
-            label = u'new_plugin'
             if self.meta[u'is_new_plugin']:
-                if label not in iw.labels and not iw.history.was_unlabeled(label):
-                    actions.newlabel.append(label)
+                actions.newlabel.append(u'new_plugin')
             else:
-                if label in iw.labels and not iw.history.was_labeled(label):
-                    actions.unlabel.append(label)
+                actions.unlabel.append(u'new_plugin')
 
         # component labels
         if not self.meta[u'is_bad_pr']:
