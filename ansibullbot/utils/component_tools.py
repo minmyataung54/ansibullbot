@@ -884,7 +884,7 @@ class AnsibleComponentMatcher(object):
             ix = body_paths.index(u'plugin')
             body_paths[ix] = u'plugins'
 
-        if not context or u'lib/ansible/modules' in context:
+        if not context or u'plugins/modules' in context:
             mmatch = self.find_module_match(body)
             if mmatch:
                 if isinstance(mmatch, list) and len(mmatch) > 1:
@@ -1045,7 +1045,7 @@ class AnsibleComponentMatcher(object):
         # be factored in ...
         #   https://github.com/ansible/ansibullbot/issues/1042
         #   https://github.com/ansible/ansibullbot/issues/1053
-        if u'lib/ansible/modules' in filename:
+        if u'plugins/modules' in filename:
             mmatch = self.find_module_match(filename)
             if mmatch and len(mmatch) == 1 and mmatch[0][u'filename'] == filename:
                 meta[u'metadata'].update(mmatch[0][u'metadata'])
@@ -1125,8 +1125,8 @@ class AnsibleComponentMatcher(object):
                 if u'notified' in fdata:
                     meta[u'notify'] += fdata[u'notified']
 
-        if u'lib/ansible/modules' in filename:
-            topics = [x for x in paths if x not in [u'lib', u'ansible', u'modules']]
+        if u'plugins/modules' in filename:
+            topics = [x for x in paths if x not in [u'plugins', u'modules']]
             topics = [x for x in topics if x != os.path.basename(filename)]
             if len(topics) == 2:
                 meta[u'topic'] = topics[0]
@@ -1137,10 +1137,10 @@ class AnsibleComponentMatcher(object):
             meta[u'namespace'] = u'/'.join(topics)
 
         # set namespace maintainers (skip !modules for now)
-        if filename.startswith(u'lib/ansible/modules'):
+        if filename.startswith(u'plugins/modules'):
             ns = meta.get(u'namespace')
             keys = self.BOTMETA[u'files'].keys()
-            keys = [x for x in keys if x.startswith(os.path.join(u'lib/ansible/modules', ns))]
+            keys = [x for x in keys if x.startswith(os.path.join(u'plugins/modules', ns))]
             ignored = []
 
             for key in keys:
@@ -1151,28 +1151,8 @@ class AnsibleComponentMatcher(object):
                 while ignoree in meta[u'namespace_maintainers']:
                     meta[u'namespace_maintainers'].remove(ignoree)
 
-        # reconcile support levels
-        if filename in support_levels:
-            # exact match
-            meta[u'support'] = support_levels[filename]
-            meta[u'supported_by'] = support_levels[filename]
-            logging.debug(u'%s support == %s' % (filename, meta[u'supported_by']))
-        else:
-            # pick the closest match
-            keys = support_levels.keys()
-            keys = sorted(keys, key=len, reverse=True)
-            if keys:
-                meta[u'support'] = support_levels[keys[0]]
-                meta[u'supported_by'] = support_levels[keys[0]]
-                logging.debug(u'%s support == %s' % (keys[0], meta[u'supported_by']))
-
-        # new modules should default to "community" support
-        if filename.startswith(u'lib/ansible/modules') and filename not in self.gitrepo.files:
-            meta[u'support'] = u'community'
-            meta[u'supported_by'] = u'community'
-
         # test targets for modules should inherit from their modules
-        if filename.startswith(u'test/integration/targets') and filename not in self.BOTMETA[u'files']:
+        if filename.startswith(u'tests/integration/targets') and filename not in self.BOTMETA[u'files']:
             whitelist = [
                 u'labels',
                 u'ignore',
@@ -1204,6 +1184,7 @@ class AnsibleComponentMatcher(object):
                 meta[u'support'] = u'community'
 
         # it's okay to remove things from legacy-files.txt
+        # FIXME update paths, may vary based on version of ansible-test
         if filename == u'test/sanity/pep8/legacy-files.txt' and not meta[u'support']:
             meta[u'support'] = u'community'
 

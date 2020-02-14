@@ -1921,7 +1921,6 @@ class AnsibleTriage(DefaultTriager):
 
         # what is this?
         self.meta[u'is_migrated'] = False
-
         # what component(s) is this about?
         self.meta.update(
             get_component_match_facts(

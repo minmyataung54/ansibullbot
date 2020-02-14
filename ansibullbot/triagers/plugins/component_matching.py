@@ -172,7 +172,6 @@ def get_component_match_facts(iw, component_matcher, valid_labels):
                 expected = sorted(set([x[u'repo_filename'] for x in CM_MATCHES]))
                 if _filenames != expected:
                     cmeta[u'needs_component_message'] = True
-
     return cmeta
 
 
