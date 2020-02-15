@@ -32,7 +32,7 @@ class AnsibleComponentMatcher(object):
 
     BOTMETA = {}
     INDEX = {}
-    #REPO = u'https://github.com/' + str(self.collection)
+    #REPO = u'https://github.com/' + to_text(self.collection)
     REPO = u'https://github.com/ansible-collections/general'
     STOPWORDS = [u'ansible', u'core', u'plugin']
     STOPCHARS = [u'"', "'", u'(', u')', u'?', u'*', u'`', u',', u':', u'?', u'-']

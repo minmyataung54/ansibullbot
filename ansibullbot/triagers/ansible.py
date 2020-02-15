@@ -238,7 +238,7 @@ class AnsibleTriage(DefaultTriager):
         self.ghw = GithubWrapper(self.gh, cachedir=self.cachedir_base)
 
         # get valid labels
-        logging.info(u'getting labels from ' + str(self.collection))
+        logging.info(u'getting labels from ' + to_text(self.collection))
         self.valid_labels = self.get_valid_labels(self.collection)
 
         self._ansible_members = []
@@ -271,7 +271,7 @@ class AnsibleTriage(DefaultTriager):
 
         # clone repo
         logging.info(u'creating gitrepowrapper')
-        repo = u'https://github.com/' + str(self.collection)
+        repo = u'https://github.com/' + to_text(self.collection)
         gitrepo = GitRepoWrapper(cachedir=self.cachedir_base, repo=repo, commit=self.ansible_commit)
 
         # set the indexers
