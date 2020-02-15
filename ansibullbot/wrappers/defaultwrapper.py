@@ -1340,10 +1340,13 @@ class DefaultWrapper(object):
 
     @property
     def from_fork(self):
+        """
+        Returns False if this PR is from a branch on the main branch
+        """
         if not self.incoming_repo_exists:
             return True
 
-        return self.incoming_repo_slug != str(self.collection)
+        return self.incoming_repo_slug != self.repo.repo_path
 
     @RateLimited
     def get_commit_parents(self, commit):
