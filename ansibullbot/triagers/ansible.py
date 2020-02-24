@@ -1116,9 +1116,11 @@ class AnsibleTriage(DefaultTriager):
         # PLUGIN LABELS
         if not self.meta[u'is_bad_pr']:
             if self.meta[u'is_new_plugin']:
-                actions.newlabel.append(u'new_plugin')
+                if u'new_plugin' not in iw.labels:
+                    actions.newlabel.append(u'new_plugin')
             else:
-                actions.unlabel.append(u'new_plugin')
+                if u'new_plugin' in iw.labels:
+                    actions.unlabel.append(u'new_plugin')
 
         # component labels
         if not self.meta[u'is_bad_pr']:
