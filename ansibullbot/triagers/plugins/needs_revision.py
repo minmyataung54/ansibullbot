@@ -6,14 +6,16 @@ import os
 
 import pytz
 
+import ansibullbot.constants as C
+
 from ansibullbot._text_compat import to_text
+from ansibullbot.triagers.plugins.botstatus import is_bot_status_comment
 from ansibullbot.triagers.plugins.shipit import is_approval
+from ansibullbot.utils.extractors import remove_markdown_blockquotes
 from ansibullbot.utils.shippable_api import has_commentable_data
 from ansibullbot.utils.shippable_api import ShippableRuns
 from ansibullbot.wrappers.historywrapper import ShippableHistory
 from ansibullbot.utils.shippable_api import ShippableNoData
-
-import ansibullbot.constants as C
 
 
 def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
@@ -230,19 +232,24 @@ def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
                         continue
 
                 if event[u'event'] == u'commented':
+                    # Remove replied to lines as we won't take a bot command from there
+                    body = remove_markdown_blockquotes(event[u'body'])
 
-                    if is_approval(event[u'body']):
+                    # bot_status comments cannot affect the state
+                    if is_bot_status_comment(body):
+                        continue
+
+                    if is_approval(body):
                         shipits[event[u'actor']] = event[u'created_at']
 
-                    if u'!needs_revision' in event[u'body']:
+                    if u'!needs_revision' in body:
                         needs_revision = False
                         needs_revision_msgs.append(
                             u'[%s] !needs_revision' % event[u'actor']
                         )
                         continue
 
-                    if u'needs_revision' in event[u'body'] and \
-                            u'!needs_revision' not in event[u'body']:
+                    if u'needs_revision' in body:
                         needs_revision = True
                         needs_revision_msgs.append(
                             u'[%s] needs_revision' % event[u'actor']
@@ -250,7 +257,7 @@ def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
                         has_set_needs_revision.add(event[u'actor'])
                         continue
 
-                    if u'shipit' in event[u'body'].lower():
+                    if u'shipit' in body.lower():
                         if event[u'actor'] in has_set_needs_revision:
                             has_set_needs_revision.remove(event[u'actor'])
                             if not has_set_needs_revision:
@@ -259,7 +266,14 @@ def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
 
             if event[u'actor'] == iw.submitter:
                 if event[u'event'] == u'commented':
-                    if u'ready_for_review' in event[u'body']:
+                    # Remove replied to lines as we won't take a bot command from there
+                    body = remove_markdown_blockquotes(event[u'body'])
+
+                    # bot_status comments cannot affect the state
+                    if is_bot_status_comment(body):
+                        continue
+
+                    if u'ready_for_review' in body:
                         if ready_for_review is None or event[u'created_at'] > ready_for_review:
                             ready_for_review = event[u'created_at']
                         needs_revision = False
@@ -267,7 +281,8 @@ def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
                             u'[%s] ready_for_review' % event[u'actor']
                         )
                         continue
-                    if u'shipit' in event[u'body'].lower():
+
+                    if u'shipit' in body.lower():
                         #ready_for_review = True
                         if ready_for_review is None or event[u'created_at'] > ready_for_review:
                             ready_for_review = event[u'created_at']
@@ -383,9 +398,17 @@ def get_needs_revision_facts(triager, issuewrapper, meta, shippable=None):
                 if x[u'event'] == u'review_changes_requested':
                     if not lrd or lrd < x[u'created_at']:
                         lrd = x[u'created_at']
-                elif x[u'event'] == u'commented' and is_approval(x[u'body']):
-                    if lrd and lrd < x[u'created_at']:
-                        lrd = None
+                elif x[u'event'] == u'commented':
+                    # Remove replied to lines as we won't take a bot command from there
+                    body = remove_markdown_blockquotes(x[u'body'])
+
+                    # bot_status comments cannot affect the state
+                    if is_bot_status_comment(body):
+                        continue
+
+                    if is_approval(body):
+                        if lrd and lrd < x[u'created_at']:
+                            lrd = None
 
             if lrd:
 

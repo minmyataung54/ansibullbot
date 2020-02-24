@@ -3,10 +3,12 @@
 import itertools
 import logging
 from fnmatch import fnmatch
-from ansibullbot.utils.moduletools import ModuleIndexer
-from ansibullbot.triagers.plugins.ci_rebuild import get_rebuild_merge_facts
 
 import ansibullbot.constants as C
+from ansibullbot.utils.extractors import remove_markdown_blockquotes
+from ansibullbot.utils.moduletools import ModuleIndexer
+from ansibullbot.triagers.plugins.botstatus import is_bot_status_comment
+from ansibullbot.triagers.plugins.ci_rebuild import get_rebuild_merge_facts
 
 
 def is_approval(body):
@@ -340,7 +342,6 @@ def get_shipit_facts(issuewrapper, inmeta, module_indexer, core_team=[], botname
 
     for event in iw.history.history:
 
-
         if event[u'event'] not in [u'commented', u'committed', u'review_approved', u'review_comment']:
             continue
         if event[u'actor'] in botnames:
@@ -365,6 +366,13 @@ def get_shipit_facts(issuewrapper, inmeta, module_indexer, core_team=[], botname
         actor = event[u'actor']
         body = event.get(u'body', u'')
         body = body.strip()
+
+        # Remove replied to lines as we won't take a bot command from there
+        body = remove_markdown_blockquotes(event[u'body'])
+
+        # A bot status comment cannot affect the state
+        if is_bot_status_comment(body):
+            continue
 
         if not is_approval(body):
             continue
