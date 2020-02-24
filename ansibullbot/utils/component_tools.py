@@ -32,8 +32,6 @@ class AnsibleComponentMatcher(object):
 
     BOTMETA = {}
     INDEX = {}
-    #REPO = u'https://github.com/' + to_text(self.collection)
-    REPO = u'https://github.com/ansible-collections/general'
     STOPWORDS = [u'ansible', u'core', u'plugin']
     STOPCHARS = [u'"', "'", u'(', u')', u'?', u'*', u'`', u',', u':', u'?', u'-']
     BLACKLIST = [u'new module', u'new modules']
@@ -105,15 +103,12 @@ class AnsibleComponentMatcher(object):
         u'winrm': u'lib/ansible/plugins/connection/winrm.py'
     }
 
-    def __init__(self, gitrepo=None, botmetafile=None, cachedir=None, commit=None, email_cache=None, file_indexer=None):
+    def __init__(self, gitrepo, botmetafile=None, cachedir=None, commit=None, email_cache=None, file_indexer=None):
         self.botmetafile = botmetafile
         self.email_cache = email_cache
         self.commit = commit
 
-        if gitrepo:
-            self.gitrepo = gitrepo
-        else:
-            self.gitrepo = GitRepoWrapper(cachedir=cachedir, repo=self.REPO, commit=self.commit)
+        self.gitrepo = gitrepo
 
         if file_indexer:
             self.file_indexer = file_indexer
