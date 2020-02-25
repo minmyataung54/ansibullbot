@@ -329,13 +329,23 @@ class AnsibleTriage(DefaultTriager):
 
     @property
     def ansible_core_team(self):
-        if self._ansible_core_team is None:
-            teams = [
-                u'ansible-commit',
-                u'ansible-community',
-                u'ansible-commit-external'
-            ]
-            self._ansible_core_team = self.get_core_team(u'ansible', teams)
+        """ Look up members GitHub Org teams which should have bot powers """
+        if self.collection:
+            if self._ansible_core_team is None:
+                teams = [
+                    u'community-team',
+                    u'community-advisory-group',
+                ]
+                self._ansible_core_team = self.get_core_team(u'ansible-collections', teams)
+        else:
+            if self._ansible_core_team is None:
+                teams = [
+                    u'ansible-commit',
+                    u'ansible-community',
+                    u'ansible-commit-external'
+                ]
+                self._ansible_core_team = self.get_core_team(u'ansible', teams)
+
         return [x for x in self._ansible_core_team if x not in self.BOTNAMES]
 
     def get_rate_limit(self):
