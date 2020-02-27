@@ -67,6 +67,7 @@ for key, contents in botmeta['files'].items():
     #if f in nwo:
     if nwo.find(f):
         # Rewrite path
+        # FIXME If community.general, keep module directory structure for modules only
         plugin = f.replace('lib/ansible/modules', 'plugins/modules')
         plugin = plugin.replace('lib/ansible/module_utils', 'plugins/module_utils')
         plugin = plugin.replace('lib/ansible/plugins', 'plugins')
